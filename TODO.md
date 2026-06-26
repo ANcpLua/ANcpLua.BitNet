@@ -27,8 +27,11 @@ test-double / SUT, **never** forced as a judge.
    (`make bitnet-up/down/status`, `make test`) and MSBuild props/targets in the Testing package.
 4. **Smoke tests** — `ANcpLua.Agents.Testing.BitNet.Tests` (xUnit v3 + MTP); Docker-gated via
    `Assert.SkipUnless(fixture.IsAvailable, ...)`.
-5. **CI + publish** — `.github/workflows` build/test gate + NuGet Trusted Publishing on tag `v*`
-   (OIDC, no stored key).
+5. **CI + publish** — DONE (preview channel): `.github/workflows/nuget-publish.yml` is the
+   ANcpLua fleet trusted-publishing pattern (keyless OIDC, no stored key), made **preview-aware**
+   (`vX.Y.Z-preview.N` tags; floor `4.0.0-preview.1`). Push-to-main is the release; the 3-OS build
+   matrix gates it; a one-time nuget.org Trusted Publishing policy authorizes the OIDC push. Stable
+   `4.0.0` is a deliberate `workflow_dispatch version=4.0.0` once the items above land.
 6. **Re-home `ANcpLua.NET.Sdk.BitNet`** — the orphaned SDK meta-package, into this repo.
 
 ## Notes / facts

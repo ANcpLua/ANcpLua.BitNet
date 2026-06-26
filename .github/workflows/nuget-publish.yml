@@ -1,0 +1,235 @@
+# ANcpLua fleet trusted-publishing pattern (keyless OIDC, no stored secrets).
+# Mirrors ANcpLua/ANcpLua.Agents @ nuget-publish.yml, adapted for the BitNet stack:
+#   - version is CI-owned and PREVIEW-AWARE (supports vX.Y.Z-preview.N tags; floor
+#     4.0.0-preview.1) — this repo ships preview-first while the TODO items land.
+#   - packs ANcpLua.Agents.Hosting.BitNet (+ its bundled generator) and
+#     ANcpLua.Agents.Testing.BitNet. The Generators project is IsPackable=false and
+#     ships INSIDE the Hosting nupkg under analyzers/dotnet/cs/.
+#
+# Invariants (do not "optimize" away):
+#   - No stored secrets. NuGet/login exchanges GitHub's OIDC token for a 1-hour
+#     single-use key at publish time (needs id-token: write + environment: nuget,
+#     matching the nuget.org Trusted Publishing policy).
+#   - --skip-duplicate makes re-runs idempotent (a re-pushed version is a green no-op).
+#   - Action refs are pinned to commit SHAs (supply-chain hygiene).
+#   - Hardening: every ${{ github.event.* }} value reaches a shell only via env (never
+#     inline) and the user-supplied version override is SemVer-validated at the source,
+#     so the version job output is provably injection-free for all downstream steps.
+#     checkout uses persist-credentials: false (no step pushes via the git credential;
+#     the release uses GH_TOKEN). workflow_dispatch can only publish from main.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version override (without v prefix, e.g. 4.0.0-preview.3 or 4.0.0). Leave empty to auto-bump from latest tag.'
+        required: false
+      force_publish:
+        description: 'Force publish even when the Must-Publish gate sees no source/workflow changes.'
+        required: false
+        type: boolean
+        default: false
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+  DOTNET_NOLOGO: true
+  CI: true
+
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.ver.outputs.version }}
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+          persist-credentials: false
+      - id: ver
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_VERSION: ${{ github.event.inputs.version }}
+        run: |
+          if [ "$EVENT_NAME" == "workflow_dispatch" ] && [ -n "$INPUT_VERSION" ]; then
+            # Validate the user-supplied override is a clean SemVer BEFORE trusting it.
+            # This is the single chokepoint: the job output below is consumed by other
+            # jobs' shells, so a malformed/hostile value must never get past here.
+            if [[ ! "$INPUT_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+              echo "::error::version override '$INPUT_VERSION' is not a valid SemVer"
+              exit 1
+            fi
+            VERSION="$INPUT_VERSION"
+          else
+            # Floor for a fresh repo: stay in the 4.0.0 preview channel until a stable
+            # v4.0.0 tag is cut deliberately (via workflow_dispatch version=4.0.0).
+            BASE="4.0.0-preview.1"
+            LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+            if [[ "$LATEST_TAG" =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+)(-preview\.([0-9]+))?$ ]]; then
+              MAJOR=${BASH_REMATCH[1]}
+              MINOR=${BASH_REMATCH[2]}
+              PATCH=${BASH_REMATCH[3]}
+              PRENUM=${BASH_REMATCH[5]}
+              if git tag --points-at HEAD | grep -qFx "$LATEST_TAG"; then
+                # the tag is on this commit — publish exactly it (skip-duplicate = no-op if already up)
+                VERSION="${LATEST_TAG#v}"
+              elif [ -n "$PRENUM" ]; then
+                # preview channel — bump the preview counter
+                VERSION="$MAJOR.$MINOR.$PATCH-preview.$((PRENUM + 1))"
+              else
+                # stable channel — patch bump
+                VERSION="$MAJOR.$MINOR.$((PATCH + 1))"
+              fi
+            else
+              VERSION="$BASE"
+            fi
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: version
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-dotnet@9a946fdbd5fb07b82b2f5a4466058b876ab72bb2 # v5
+        with:
+          global-json-file: global.json
+      - name: Restore
+        run: dotnet restore ANcpLua.BitNet.slnx
+      - name: Build
+        env:
+          VERSION: ${{ needs.version.outputs.version }}
+        run: dotnet build ANcpLua.BitNet.slnx -c Release --no-restore -p:Version="$VERSION"
+      - name: Pack
+        if: matrix.os == 'ubuntu-latest'
+        env:
+          VERSION: ${{ needs.version.outputs.version }}
+        run: |
+          dotnet pack src/ANcpLua.Agents.Hosting.BitNet/ANcpLua.Agents.Hosting.BitNet.csproj -c Release -o artifacts -p:Version="$VERSION" --no-build
+          dotnet pack src/ANcpLua.Agents.Testing.BitNet/ANcpLua.Agents.Testing.BitNet.csproj -c Release -o artifacts -p:Version="$VERSION" --no-build
+      - name: Verify the bundled generator shipped inside the Hosting nupkg
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          NUPKG=$(ls artifacts/ANcpLua.Agents.Hosting.BitNet.*.nupkg)
+          echo "Inspecting $NUPKG"
+          unzip -l "$NUPKG" | grep -q 'analyzers/dotnet/cs/ANcpLua.Agents.Hosting.BitNet.Generators.dll' \
+            || { echo "::error::bundled generator missing from $NUPKG"; exit 1; }
+          echo "OK: generator ships under analyzers/dotnet/cs/"
+      - name: Upload artifacts
+        if: matrix.os == 'ubuntu-latest'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: packages
+          path: artifacts/*.nupkg
+          if-no-files-found: error
+
+  publish:
+    needs: [version, build]
+    # workflow_dispatch can only publish from main (never an arbitrary feature ref).
+    if: >-
+      github.ref == 'refs/heads/main' &&
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    environment: nuget          # must match the nuget.org Trusted Publishing policy's Environment field
+    permissions:
+      contents: write           # for the gh release step
+      id-token: write           # REQUIRED for the OIDC exchange — without it, login fails
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+          persist-credentials: false
+      - name: Must Publish Packages
+        id: has_changes
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          FORCE_PUBLISH: ${{ github.event.inputs.force_publish }}
+        run: |
+          if [ "$EVENT_NAME" == "workflow_dispatch" ] && [ "$FORCE_PUBLISH" == "true" ]; then
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          if [ -z "$LATEST_TAG" ]; then
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+          else
+            COMPARE_TAG="$LATEST_TAG"
+            if git tag --points-at HEAD | grep -qFx "$LATEST_TAG"; then
+              COMPARE_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+            fi
+            if [ -z "$COMPARE_TAG" ]; then
+              echo "has_changes=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            CHANGES=$(git diff --name-only "$COMPARE_TAG" HEAD -- 'src/**' '.github/workflows/nuget-publish.yml' || true)
+            if [ -n "$CHANGES" ]; then
+              echo "$CHANGES"
+              echo "has_changes=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "has_changes=false" >> "$GITHUB_OUTPUT"
+            fi
+          fi
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        if: steps.has_changes.outputs.has_changes == 'true'
+        with:
+          name: packages
+          path: artifacts/
+      - uses: actions/setup-dotnet@9a946fdbd5fb07b82b2f5a4466058b876ab72bb2 # v5
+        if: steps.has_changes.outputs.has_changes == 'true'
+        with:
+          dotnet-version: '10.0.x'
+      - name: Authenticate to NuGet
+        if: steps.has_changes.outputs.has_changes == 'true'
+        id: nuget-login
+        uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841 # v1
+        with:
+          user: ANcpLua
+      - name: Push to NuGet
+        if: steps.has_changes.outputs.has_changes == 'true'
+        env:
+          NUGET_API_KEY: ${{ steps.nuget-login.outputs.NUGET_API_KEY }}
+        run: |
+          for pkg in artifacts/*.nupkg; do
+            dotnet nuget push "$pkg" \
+              --source https://api.nuget.org/v3/index.json \
+              --api-key "$NUGET_API_KEY" \
+              --skip-duplicate
+          done
+      - name: Create GitHub release
+        if: steps.has_changes.outputs.has_changes == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.version.outputs.version }}
+        run: |
+          TAG="v${VERSION}"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG already exists, skipping"
+          else
+            # prerelease versions (-preview.N) are marked as GitHub pre-releases
+            PRERELEASE_FLAG=""
+            case "$VERSION" in *-*) PRERELEASE_FLAG="--prerelease" ;; esac
+            gh release create "$TAG" --generate-notes --title "$TAG" $PRERELEASE_FLAG
+          fi
