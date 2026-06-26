@@ -127,6 +127,7 @@ jobs:
         env:
           VERSION: ${{ needs.version.outputs.version }}
         run: |
+          dotnet pack src/ANcpLua.Agents.BitNet.Core/ANcpLua.Agents.BitNet.Core.csproj -c Release -o artifacts -p:Version="$VERSION" --no-build
           dotnet pack src/ANcpLua.Agents.Hosting.BitNet/ANcpLua.Agents.Hosting.BitNet.csproj -c Release -o artifacts -p:Version="$VERSION" --no-build
           dotnet pack src/ANcpLua.Agents.Testing.BitNet/ANcpLua.Agents.Testing.BitNet.csproj -c Release -o artifacts -p:Version="$VERSION" --no-build
       - name: Verify the bundled generator shipped inside the Hosting nupkg

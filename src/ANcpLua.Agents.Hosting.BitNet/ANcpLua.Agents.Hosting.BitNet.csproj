@@ -14,8 +14,10 @@
         <PackageReference Include="ANcpLua.Roslyn.Utilities"/>
         <PackageReference Include="Microsoft.Agents.AI"/>
         <PackageReference Include="Microsoft.Extensions.AI"/>
-        <PackageReference Include="Microsoft.Extensions.AI.OpenAI"/>
-        <PackageReference Include="OpenAI"/>
+    </ItemGroup>
+
+    <ItemGroup Label="Dependency-free client core (BitNetClientOptions / Factory / LegacyMaxTokensPolicy)">
+        <ProjectReference Include="..\ANcpLua.Agents.BitNet.Core\ANcpLua.Agents.BitNet.Core.csproj"/>
     </ItemGroup>
 
     <ItemGroup Label="Bundled Roslyn source generator (ships under analyzers/dotnet/cs/ in the nupkg)">

@@ -5,7 +5,7 @@ namespace ANcpLua.Agents.Hosting.BitNet;
 /// <summary>
 ///     Configuration for a single <c>bitnet.cpp</c> <c>llama-server</c> endpoint exposed as an
 ///     OpenAI-compatible chat client. Bound from <c>BitNet:&lt;name&gt;:*</c> configuration sections
-///     by <see cref="BitNetHostingExtensions.AddBitNetChatClient(Microsoft.Extensions.Hosting.IHostApplicationBuilder, string, System.Action{BitNetClientOptions}?)" />.
+///     by <c>BitNetHostingExtensions.AddBitNetChatClient</c> in the <c>ANcpLua.Agents.Hosting.BitNet</c> package.
 /// </summary>
 /// <remarks>
 ///     <para>Environment-variable overrides resolved by <see cref="ApplyEnvironmentOverrides" /> take
@@ -48,7 +48,7 @@ public sealed class BitNetClientOptions
     /// </summary>
     public TimeSpan HttpClientTimeout { get; set; } = TimeSpan.FromSeconds(120);
 
-    /// <summary>Timeout for the <c>/health</c> probe used by <see cref="BitNetHealthCheck" />. Defaults to 3 seconds.</summary>
+    /// <summary>Timeout for the <c>/health</c> probe used by <c>BitNetHealthCheck</c> (in the hosting package). Defaults to 3 seconds.</summary>
     public TimeSpan HealthProbeTimeout { get; set; } = TimeSpan.FromSeconds(3);
 
     /// <summary>

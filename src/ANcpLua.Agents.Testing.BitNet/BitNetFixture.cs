@@ -1,10 +1,6 @@
-using System.ClientModel;
-using System.ClientModel.Primitives;
 using System.Diagnostics;
-using System.Text.Json.Nodes;
-using ANcpLua.Roslyn.Utilities;
+using ANcpLua.Agents.Hosting.BitNet;
 using Microsoft.Extensions.AI;
-using OpenAI;
 using Xunit;
 
 namespace ANcpLua.Agents.Testing.BitNet;
@@ -40,12 +36,11 @@ namespace ANcpLua.Agents.Testing.BitNet;
 ///         <item><c>BITNET_API_PATH</c> — overrides the default OpenAI-compatible API path (<c>/v1</c>).</item>
 ///         <item><c>BITNET_MODEL</c> — overrides the default model id (<c>bitnet-b1.58-2B-4T</c>).</item>
 ///     </list>
-///     <para>This fixture intentionally does not depend on the
-///     <c>ANcpLua.Agents.Hosting.BitNet</c> package — Testing is on the stable channel and BitNet
-///     hosting is alpha, so they cannot share a runtime <c>PackageReference</c>. The private
-///     <see cref="LegacyMaxTokensPolicy" /> below duplicates the public policy in
-///     <c>ANcpLua.Agents.Hosting.BitNet</c> intentionally; both files are ~50 lines and never
-///     drift in lockstep because each is scoped to its own assembly boundary.</para>
+///     <para>The <see cref="IChatClient" /> is built by
+///     <see cref="BitNetChatClientFactory.Create" /> from the dependency-free
+///     <c>ANcpLua.Agents.BitNet.Core</c> package — the same factory the hosting package uses — so
+///     the OpenAI-compatible wiring and the <c>LegacyMaxTokensPolicy</c> shim live in exactly one
+///     place. Core carries no ASP.NET Core dependency, so this fixture stays light.</para>
 /// </remarks>
 public sealed class BitNetFixture : IAsyncLifetime
 {
@@ -59,9 +54,6 @@ public sealed class BitNetFixture : IAsyncLifetime
     /// <summary>Host port the auto-managed Docker container binds to. Maps to container port 11434.</summary>
     public const int DockerPort = 11434;
 
-    private const string DefaultApiPath = "/v1";
-    private const string DefaultModel = "bitnet-b1.58-2B-4T";
-    private const string UnusedApiKey = "unused";
     private const string OptOutEnvironmentVariable = "BITNET_FIXTURE_NO_DOCKER";
     private const string ContainerNamePrefix = "bitnet-fixture-";
 
@@ -93,17 +85,12 @@ public sealed class BitNetFixture : IAsyncLifetime
         IsAvailable = await ProbeHealthAsync(Endpoint).ConfigureAwait(false);
         if (!IsAvailable) return;
 
-        var apiPath = Environment.GetEnvironmentVariable("BITNET_API_PATH") is { Length: > 0 } configuredApiPath
-            ? configuredApiPath
-            : DefaultApiPath;
-        var model = Environment.GetEnvironmentVariable("BITNET_MODEL") is { Length: > 0 } configuredModel
-            ? configuredModel
-            : DefaultModel;
-
-        var options = new OpenAIClientOptions { Endpoint = new Uri(Endpoint, apiPath) };
-        options.AddPolicy(new LegacyMaxTokensPolicy(), PipelinePosition.PerCall);
-        var client = new OpenAIClient(new ApiKeyCredential(UnusedApiKey), options);
-        ChatClient = client.GetChatClient(model).AsIChatClient();
+        // Delegate construction to the shared core factory: it appends the resolved Endpoint +
+        // ApiPath, applies BITNET_API_PATH / BITNET_MODEL overrides, and installs the
+        // LegacyMaxTokensPolicy shim — the same wiring the hosting package uses. BITNET_URL is
+        // already reflected in Endpoint (resolved above), so re-applying overrides is idempotent.
+        var options = new BitNetClientOptions { Endpoint = Endpoint }.ApplyEnvironmentOverrides();
+        ChatClient = BitNetChatClientFactory.Create(options);
     }
 
     /// <inheritdoc />
@@ -294,63 +281,4 @@ public sealed class BitNetFixture : IAsyncLifetime
             _ when string.Equals(value, "on", StringComparison.OrdinalIgnoreCase) => true,
             _ => false
         };
-}
-
-/// <summary>
-///     Mirrors <c>max_completion_tokens</c> → <c>max_tokens</c> for older llama-server builds
-///     (pre ggml-org/llama.cpp PR #19831, merged 2026-02-23). Duplicates the public policy in
-///     <c>ANcpLua.Agents.Hosting.BitNet</c> intentionally — Testing is on the stable channel and
-///     cannot take a runtime dep on alpha-channel BitNet hosting.
-/// </summary>
-internal sealed class LegacyMaxTokensPolicy : PipelinePolicy
-{
-    public override void Process(PipelineMessage message, IReadOnlyList<PipelinePolicy> pipeline, int currentIndex)
-    {
-        Mirror(message);
-        ProcessNext(message, pipeline, currentIndex);
-    }
-
-    public override async ValueTask ProcessAsync(PipelineMessage message, IReadOnlyList<PipelinePolicy> pipeline, int currentIndex)
-    {
-        await MirrorAsync(message).ConfigureAwait(false);
-        await ProcessNextAsync(message, pipeline, currentIndex).ConfigureAwait(false);
-    }
-
-    private static void Mirror(PipelineMessage message)
-    {
-        if (!ShouldMirror(message, out var content)) return;
-        using var buffer = new MemoryStream();
-        content.WriteTo(buffer, default);
-        Apply(message, buffer);
-    }
-
-    private static async ValueTask MirrorAsync(PipelineMessage message)
-    {
-        if (!ShouldMirror(message, out var content)) return;
-        await using var buffer = new MemoryStream();
-        await content.WriteToAsync(buffer, message.CancellationToken).ConfigureAwait(false);
-        Apply(message, buffer);
-    }
-
-    private static bool ShouldMirror(PipelineMessage message, out BinaryContent content)
-    {
-        // CS8625: `out BinaryContent` must be assigned on every return path. Callers must check
-        // the bool before reading `content`; the false-returning branches never expose the null.
-        content = null!;
-        if (message.Request?.Content is not { } c) return false;
-        if (message.Request.Uri?.AbsolutePath?.EndsWithOrdinal("/chat/completions") is not true) return false;
-        content = c;
-        return true;
-    }
-
-    private static void Apply(PipelineMessage message, MemoryStream buffer)
-    {
-        buffer.Position = 0;
-        if (JsonNode.Parse(buffer) is not JsonObject body) return;
-        if (body["max_tokens"] is null && body["max_completion_tokens"] is { } mct)
-        {
-            body["max_tokens"] = mct.DeepClone();
-            message.Request.Content = BinaryContent.Create(BinaryData.FromString(body.ToJsonString()));
-        }
-    }
 }

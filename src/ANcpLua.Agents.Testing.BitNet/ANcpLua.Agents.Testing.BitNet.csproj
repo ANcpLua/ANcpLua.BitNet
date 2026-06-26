@@ -9,11 +9,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="ANcpLua.Roslyn.Utilities"/>
         <PackageReference Include="Microsoft.Extensions.AI"/>
-        <PackageReference Include="Microsoft.Extensions.AI.OpenAI"/>
-        <PackageReference Include="OpenAI"/>
         <PackageReference Include="xunit.v3.extensibility.core"/>
+    </ItemGroup>
+
+    <ItemGroup Label="Dependency-free client core (BitNetClientOptions / BitNetChatClientFactory) — no AspNetCore">
+        <ProjectReference Include="..\ANcpLua.Agents.BitNet.Core\ANcpLua.Agents.BitNet.Core.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
