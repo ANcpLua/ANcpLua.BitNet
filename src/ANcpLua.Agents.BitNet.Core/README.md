@@ -1,6 +1,6 @@
 # ANcpLua.Agents.BitNet.Core
 
-The **dependency-free client core** for the BitNet (`bitnet.cpp` / `llama-server`) stack — the
+The **client core** for the BitNet (`bitnet.cpp` / `llama-server`) stack — the
 shared base that both [`ANcpLua.Agents.Hosting.BitNet`](https://www.nuget.org/packages/ANcpLua.Agents.Hosting.BitNet)
 and [`ANcpLua.Agents.Testing.BitNet`](https://www.nuget.org/packages/ANcpLua.Agents.Testing.BitNet)
 build on, with **no hosting / ASP.NET Core dependency**.
@@ -13,6 +13,7 @@ build on, with **no hosting / ASP.NET Core dependency**.
 
 ```csharp
 using ANcpLua.Agents.Hosting.BitNet;
+using Microsoft.Extensions.AI;
 
 IChatClient client = BitNetChatClientFactory.Create(new BitNetClientOptions
 {

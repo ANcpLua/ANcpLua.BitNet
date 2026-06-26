@@ -37,7 +37,7 @@ namespace ANcpLua.Agents.Testing.BitNet;
 ///         <item><c>BITNET_MODEL</c> — overrides the default model id (<c>bitnet-b1.58-2B-4T</c>).</item>
 ///     </list>
 ///     <para>The <see cref="IChatClient" /> is built by
-///     <see cref="BitNetChatClientFactory.Create" /> from the dependency-free
+///     <see cref="BitNetChatClientFactory.Create" /> from the shared
 ///     <c>ANcpLua.Agents.BitNet.Core</c> package — the same factory the hosting package uses — so
 ///     the OpenAI-compatible wiring and the <c>LegacyMaxTokensPolicy</c> shim live in exactly one
 ///     place. Core carries no ASP.NET Core dependency, so this fixture stays light.</para>

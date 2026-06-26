@@ -13,7 +13,7 @@
         <PackageReference Include="xunit.v3.extensibility.core"/>
     </ItemGroup>
 
-    <ItemGroup Label="Dependency-free client core (BitNetClientOptions / BitNetChatClientFactory) — no AspNetCore">
+    <ItemGroup Label="Shared client core (BitNetClientOptions / BitNetChatClientFactory) — no ASP.NET Core">
         <ProjectReference Include="..\ANcpLua.Agents.BitNet.Core\ANcpLua.Agents.BitNet.Core.csproj"/>
     </ItemGroup>
 

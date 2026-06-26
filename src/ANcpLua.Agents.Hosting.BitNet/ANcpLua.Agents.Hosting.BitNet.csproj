@@ -16,7 +16,7 @@
         <PackageReference Include="Microsoft.Extensions.AI"/>
     </ItemGroup>
 
-    <ItemGroup Label="Dependency-free client core (BitNetClientOptions / Factory / LegacyMaxTokensPolicy)">
+    <ItemGroup Label="Shared client core (BitNetClientOptions / Factory / LegacyMaxTokensPolicy) — no ASP.NET Core">
         <ProjectReference Include="..\ANcpLua.Agents.BitNet.Core\ANcpLua.Agents.BitNet.Core.csproj"/>
     </ItemGroup>
 
