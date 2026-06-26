@@ -1,0 +1,27 @@
+<Project Sdk="ANcpLua.NET.Sdk">
+    <PropertyGroup>
+        <!-- Types intentionally keep the ANcpLua.Agents.Hosting.BitNet namespace for API
+             stability (already shipped in 4.0.0-preview.1). The assembly is split out so the
+             test fixture (and any consumer that only needs the client) can take the
+             BitNet client core WITHOUT the hosting / ASP.NET Core stack. -->
+        <RootNamespace>ANcpLua.Agents.Hosting.BitNet</RootNamespace>
+        <PackageId>ANcpLua.Agents.BitNet.Core</PackageId>
+        <Description>BitNet (bitnet.cpp llama-server) client core: BitNetClientOptions, BitNetChatClientFactory (builds an OpenAI-compatible IChatClient), and the LegacyMaxTokensPolicy shim. No hosting / ASP.NET Core dependency — the shared base for ANcpLua.Agents.Hosting.BitNet and ANcpLua.Agents.Testing.BitNet. BitNet is a local test-double / system-under-test, not an authoritative judge.</Description>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageTags>bitnet;llama-cpp;local-llm;ichatclient;openai-compatible</PackageTags>
+        <!-- Mirrors upstream Microsoft.Extensions.AI / OpenAI experimental API diagnostics. -->
+        <NoWarn>$(NoWarn);OPENAI001;MEAI001</NoWarn>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="ANcpLua.Roslyn.Utilities"/>
+        <PackageReference Include="Microsoft.Extensions.AI"/>
+        <PackageReference Include="Microsoft.Extensions.AI.OpenAI"/>
+        <PackageReference Include="OpenAI"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="README.md" Pack="true" PackagePath="\"/>
+        <None Include="..\..\LICENSE" Pack="true" PackagePath="\"/>
+    </ItemGroup>
+</Project>
