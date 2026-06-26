@@ -1,0 +1,23 @@
+<Project Sdk="ANcpLua.NET.Sdk">
+    <PropertyGroup>
+        <RootNamespace>ANcpLua.Agents.Testing.BitNet</RootNamespace>
+        <PackageId>ANcpLua.Agents.Testing.BitNet</PackageId>
+        <Description>xUnit v3 fixture that auto-manages a local BitNet (bitnet.cpp llama-server) Docker container (digest-pinned, idempotent inspect-before-pull) and exposes an IChatClient for tests. BitNet is a local test-double / system-under-test, not an authoritative judge.</Description>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageTags>bitnet;llama-cpp;local-llm;testing;xunit;fixture;docker</PackageTags>
+        <NoWarn>$(NoWarn);OPENAI001;MEAI001;MAAI001</NoWarn>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="ANcpLua.Roslyn.Utilities"/>
+        <PackageReference Include="Microsoft.Extensions.AI"/>
+        <PackageReference Include="Microsoft.Extensions.AI.OpenAI"/>
+        <PackageReference Include="OpenAI"/>
+        <PackageReference Include="xunit.v3.extensibility.core"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="README.md" Pack="true" PackagePath="\"/>
+        <None Include="..\..\LICENSE" Pack="true" PackagePath="\"/>
+    </ItemGroup>
+</Project>

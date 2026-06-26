@@ -1,0 +1,19 @@
+<Project>
+  <PropertyGroup>
+    <ArtifactsPath>$(MSBuildThisFileDirectory)artifacts/</ArtifactsPath>
+    <BaseOutputPath>$(ArtifactsPath)bin/$(MSBuildProjectName)/</BaseOutputPath>
+    <BaseIntermediateOutputPath>$(ArtifactsPath)obj/$(MSBuildProjectName)/</BaseIntermediateOutputPath>
+
+    <VersionPrefix Condition="'$(VersionPrefix)' == ''">4.0.0</VersionPrefix>
+    <VersionSuffix Condition="'$(VersionSuffix)' == ''">local</VersionSuffix>
+    <Version Condition="'$(VersionSuffix)' != ''">$(VersionPrefix)-$(VersionSuffix)</Version>
+    <Version Condition="'$(VersionSuffix)' == ''">$(VersionPrefix)</Version>
+
+    <NoWarn>$(NoWarn);NU1604</NoWarn>
+
+    <Authors>Alexander Nachtmann</Authors>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/ANcpLua/ANcpLua.BitNet</RepositoryUrl>
+    <PackageProjectUrl>$(RepositoryUrl)</PackageProjectUrl>
+  </PropertyGroup>
+</Project>

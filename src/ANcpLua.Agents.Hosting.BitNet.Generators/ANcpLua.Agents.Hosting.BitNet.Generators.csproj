@@ -1,0 +1,40 @@
+<Project Sdk="ANcpLua.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <LangVersion>latest</LangVersion>
+        <Nullable>enable</Nullable>
+        <PackageId>ANcpLua.Agents.Hosting.BitNet.Generators</PackageId>
+        <RootNamespace>ANcpLua.Agents.Hosting.BitNet.Generators</RootNamespace>
+
+        <IsRoslynComponent>true</IsRoslynComponent>
+        <IncludeBuildOutput>false</IncludeBuildOutput>
+        <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <IsAotCompatible>false</IsAotCompatible>
+        <EnableAotAnalyzer>false</EnableAotAnalyzer>
+        <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+
+        <!-- Tiny standalone generator — shipped under analyzers/dotnet/cs/ of the runtime package. -->
+        <IsPackable>false</IsPackable>
+        <GenerateSBOM>false</GenerateSBOM>
+
+        <!-- self-describe the Roslyn reference; SDK name-matching injection is fragile under IDE LSPs -->
+        <DisableImplicitRoslynPackageReference>true</DisableImplicitRoslynPackageReference>
+
+        <!-- RS0030: BannedApiAnalyzers fires on the ANcpLua.Roslyn.Utilities.Sources polyfills
+             (TimeProvider, ByteSize) which use DateTimeOffset.UtcNow / Math.Round(double, int).
+             We don't own that source — suppress here. -->
+        <NoWarn>$(NoWarn);RS0030</NoWarn>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <!-- ANcpLua.Roslyn.Utilities.Sources polyfills IsExternalInit etc. for init-only/record on netstandard2.0. -->
+        <PackageReference Include="ANcpLua.Roslyn.Utilities.Sources" PrivateAssets="all"/>
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" PrivateAssets="all"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <AdditionalFiles Include="AnalyzerReleases.Shipped.md"/>
+        <AdditionalFiles Include="AnalyzerReleases.Unshipped.md"/>
+    </ItemGroup>
+</Project>

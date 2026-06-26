@@ -1,0 +1,35 @@
+<Project>
+  <Import Project="$(MSBuildThisFileDirectory)Version.props"/>
+
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
+  </PropertyGroup>
+
+  <ItemGroup Label="Roslyn.Utilities (sibling repo)">
+    <PackageVersion Include="ANcpLua.Roslyn.Utilities" Version="$(ANcpLuaRoslynUtilitiesVersion)"/>
+    <PackageVersion Include="ANcpLua.Roslyn.Utilities.Sources" Version="$(ANcpLuaRoslynUtilitiesVersion)"/>
+  </ItemGroup>
+
+  <ItemGroup Label="Roslyn">
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="$(MicrosoftCodeAnalysisCSharpVersion)"/>
+  </ItemGroup>
+
+  <ItemGroup Label="Microsoft.Agents (MAF 1.11.x)">
+    <PackageVersion Include="Microsoft.Agents.AI" Version="$(MicrosoftAgentsAIVersion)"/>
+  </ItemGroup>
+
+  <ItemGroup Label="Microsoft.Extensions / OpenAI">
+    <PackageVersion Include="Microsoft.Extensions.AI" Version="$(MicrosoftExtensionsAIVersion)"/>
+    <PackageVersion Include="Microsoft.Extensions.AI.OpenAI" Version="$(MicrosoftExtensionsAIOpenAIVersion)"/>
+    <PackageVersion Include="OpenAI" Version="$(OpenAIVersion)"/>
+  </ItemGroup>
+
+  <ItemGroup Label="Testing">
+    <PackageVersion Update="xunit.v3" Version="$(XunitV3Version)"/>
+    <PackageVersion Update="xunit.v3.mtp-v2" Version="$(XunitV3Version)"/>
+    <PackageVersion Update="Microsoft.Testing.Platform" Version="$(MTPExtensionsVersion)"/>
+    <PackageVersion Include="xunit.v3.extensibility.core" Version="$(XunitV3Version)"/>
+    <PackageVersion Include="xunit.v3.assert" Version="$(XunitV3Version)"/>
+  </ItemGroup>
+</Project>

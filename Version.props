@@ -1,0 +1,32 @@
+<Project>
+  <!--
+    LOCAL OVERRIDE — ANcpLua.BitNet
+    Directory.Packages.props imports this before the SDK-shipped truth is in scope,
+    so every referenced version variable must be defined here.
+  -->
+  <PropertyGroup Label="Roslyn.Utilities (sibling repo)">
+    <ANcpLuaRoslynUtilitiesVersion>2.2.27</ANcpLuaRoslynUtilitiesVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Microsoft.Agents (MAF 1.11.0)">
+    <MicrosoftAgentsAIVersion>1.11.0</MicrosoftAgentsAIVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Microsoft.Extensions">
+    <MicrosoftExtensionsAIVersion>10.7.0</MicrosoftExtensionsAIVersion>
+    <MicrosoftExtensionsAIOpenAIVersion>10.7.0</MicrosoftExtensionsAIOpenAIVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Roslyn">
+    <MicrosoftCodeAnalysisCSharpVersion>5.3.0</MicrosoftCodeAnalysisCSharpVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Label="LLM Provider SDKs">
+    <OpenAIVersion>2.11.0</OpenAIVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Testing">
+    <XunitV3Version>3.2.2</XunitV3Version>
+    <MTPExtensionsVersion>2.1.0</MTPExtensionsVersion>
+  </PropertyGroup>
+</Project>

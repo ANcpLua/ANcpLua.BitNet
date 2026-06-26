@@ -1,0 +1,49 @@
+<Project Sdk="ANcpLua.NET.Sdk">
+    <PropertyGroup>
+        <RootNamespace>ANcpLua.Agents.Hosting.BitNet</RootNamespace>
+        <PackageId>ANcpLua.Agents.Hosting.BitNet</PackageId>
+        <Description>BitNet (bitnet.cpp llama-server) hosting facades. Reads the OpenAI-compatible /v1 surface exposed by bitnet.cpp and registers a keyed IChatClient, health-check, and legacy-max-tokens shim. Bundles a Roslyn source generator that auto-wires [assembly: BitNetEndpoint] attributes. BitNet is a local test-double / system-under-test, not an authoritative judge.</Description>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageTags>bitnet;llama-cpp;local-llm;hosting;ichatclient;openai-compatible</PackageTags>
+        <!-- Mirrors upstream Microsoft.Extensions.AI / OpenAI experimental API diagnostics. -->
+        <NoWarn>$(NoWarn);OPENAI001;MEAI001;MAAI001</NoWarn>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <FrameworkReference Include="Microsoft.AspNetCore.App"/>
+        <PackageReference Include="ANcpLua.Roslyn.Utilities"/>
+        <PackageReference Include="Microsoft.Agents.AI"/>
+        <PackageReference Include="Microsoft.Extensions.AI"/>
+        <PackageReference Include="Microsoft.Extensions.AI.OpenAI"/>
+        <PackageReference Include="OpenAI"/>
+    </ItemGroup>
+
+    <ItemGroup Label="Bundled Roslyn source generator (ships under analyzers/dotnet/cs/ in the nupkg)">
+        <ProjectReference Include="..\ANcpLua.Agents.Hosting.BitNet.Generators\ANcpLua.Agents.Hosting.BitNet.Generators.csproj"
+                          OutputItemType="Analyzer"
+                          ReferenceOutputAssembly="false"
+                          PrivateAssets="all"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="README.md" Pack="true" PackagePath="\"/>
+        <None Include="..\..\LICENSE" Pack="true" PackagePath="\"/>
+    </ItemGroup>
+
+    <!-- Pack the bundled generator DLL into analyzers/dotnet/cs/. Resolve via the generator
+         project's GetTargetPath target so we are immune to the artifacts/ output layout. -->
+    <PropertyGroup>
+        <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);_AddBundledGeneratorToPackage</TargetsForTfmSpecificContentInPackage>
+    </PropertyGroup>
+
+    <Target Name="_AddBundledGeneratorToPackage">
+        <MSBuild Projects="..\ANcpLua.Agents.Hosting.BitNet.Generators\ANcpLua.Agents.Hosting.BitNet.Generators.csproj"
+                 Targets="GetTargetPath"
+                 Properties="TargetFramework=netstandard2.0;Configuration=$(Configuration)">
+            <Output ItemName="_BundledGeneratorAssembly" TaskParameter="TargetOutputs"/>
+        </MSBuild>
+        <ItemGroup>
+            <TfmSpecificPackageFile Include="@(_BundledGeneratorAssembly)" PackagePath="analyzers/dotnet/cs/"/>
+        </ItemGroup>
+    </Target>
+</Project>

@@ -1,0 +1,37 @@
+# ANcpLua.BitNet — roadmap / resume anchor
+
+Goal: clean, publishable re-home of the BitNet stack purged from `ANcpLua.Agents`
+(`83a8b5d Purge agents toolkit to instrumentation core`). Principle: BitNet is a
+test-double / SUT, **never** forced as a judge.
+
+## Done
+- Repo scaffold: `global.json` (ANcpLua.NET.Sdk 3.4.42, MTP), `Version.props`,
+  `Directory.Build.props` / `Directory.Packages.props` (CPM), LICENSE (MIT), `.gitignore`.
+- Recovered the purged stack from history and renamed `Qyl*` -> `BitNet*` (clean public API;
+  breaking vs the published 3.x alpha -> new major **4.0.0**).
+- `ANcpLua.Agents.Hosting.BitNet` (+ bundled `.Generators`) **builds and packs**
+  (analyzer ships under `analyzers/dotnet/cs/` in the nupkg).
+- `ANcpLua.Agents.Testing.BitNet` (`BitNetFixture`, `BitNetAttribute`, `BitNetTestGroup`) **builds**.
+- README + `docs/bitnet-not-a-judge.md` (the honest capability/runtime verdict, with measured evidence).
+
+## Next (each its own small increment)
+1. **Fixture factory-dedup** — now Testing and Hosting share a repo/channel, delegate the
+   `IChatClient` build to `BitNetChatClientFactory.Create(...)` and delete the duplicated
+   private `LegacyMaxTokensPolicy` in `BitNetFixture`. (The reason it was duplicated —
+   stable-vs-alpha channel split — is gone.)
+2. **`[BitNet]` maximal generator** — a generator (shipped in the Testing package) that turns
+   `[BitNet(Model=..., Port=...)]` on a test class into the xUnit fixture/collection wiring +
+   health wait. `BitNetContainer.Create()` stays as the explicit escape hatch.
+3. **Idempotent entry** — refine `scripts/bitnet-docker.sh` to a true idempotent `up`
+   (skip if already running + healthy, don't re-`rm`), add a `Makefile`
+   (`make bitnet-up/down/status`, `make test`) and MSBuild props/targets in the Testing package.
+4. **Smoke tests** — `ANcpLua.Agents.Testing.BitNet.Tests` (xUnit v3 + MTP); Docker-gated via
+   `Assert.SkipUnless(fixture.IsAvailable, ...)`.
+5. **CI + publish** — `.github/workflows` build/test gate + NuGet Trusted Publishing on tag `v*`
+   (OIDC, no stored key).
+6. **Re-home `ANcpLua.NET.Sdk.BitNet`** — the orphaned SDK meta-package, into this repo.
+
+## Notes / facts
+- Pinned image digest: `mcr.microsoft.com/appsvc/docs/sidecars/sample-experiment@sha256:9d5f7f4e…cd243a`.
+- Versions live in `Version.props` (local override; mirrors the ANcpLua cross-repo pattern).
+  `Microsoft.CodeAnalysis.CSharp` pinned to 5.3.0 (transitive floor from ANcpLua.Roslyn.Utilities 2.2.27).
