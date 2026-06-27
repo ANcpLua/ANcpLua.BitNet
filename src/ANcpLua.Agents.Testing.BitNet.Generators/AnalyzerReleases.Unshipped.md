@@ -8,3 +8,4 @@ Rule ID | Category | Severity | Notes
 BITNET001 | ANcpLua.Agents.Testing.BitNet | Error | [BitNet] type must be declared partial.
 BITNET002 | ANcpLua.Agents.Testing.BitNet | Error | [BitNet] type must be top-level (not nested).
 BITNET003 | ANcpLua.Agents.Testing.BitNet | Error | [BitNet] type must be non-generic.
+BITNET004 | ANcpLua.Agents.Testing.BitNet | Error | [BitNet] type must not declare a constructor.

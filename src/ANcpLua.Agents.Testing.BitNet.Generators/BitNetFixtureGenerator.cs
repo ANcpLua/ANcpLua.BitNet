@@ -46,6 +46,14 @@ public sealed class BitNetFixtureGenerator : IIncrementalGenerator
         DiagnosticSeverity.Error,
         isEnabledByDefault: true);
 
+    private static readonly DiagnosticDescriptor s_mustNotDeclareConstructor = new(
+        "BITNET004",
+        "[BitNet] type must not declare a constructor",
+        "Type '{0}' is marked [BitNet] but declares its own constructor; the generator owns the fixture constructor, so remove the hand-written one",
+        "ANcpLua.Agents.Testing.BitNet",
+        DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
+
     /// <inheritdoc />
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
@@ -113,10 +121,11 @@ public sealed class BitNetFixtureGenerator : IIncrementalGenerator
         bool IsPartial,
         bool IsNested,
         bool IsGeneric,
+        bool HasUserConstructor,
         string HintName,
         LocationInfo Location)
     {
-        public bool IsValid => IsPartial && !IsNested && !IsGeneric;
+        public bool IsValid => IsPartial && !IsNested && !IsGeneric && !HasUserConstructor;
 
         public static Model From(GeneratorAttributeSyntaxContext ctx)
         {
@@ -144,6 +153,7 @@ public sealed class BitNetFixtureGenerator : IIncrementalGenerator
                 IsPartial: syntax.Modifiers.Any(SyntaxKind.PartialKeyword),
                 IsNested: symbol.ContainingType is not null,
                 IsGeneric: symbol.TypeParameters.Length > 0,
+                HasUserConstructor: symbol.InstanceConstructors.Any(static c => !c.IsImplicitlyDeclared),
                 hint,
                 LocationInfo.From(syntax.Identifier.GetLocation()));
         }
@@ -165,6 +175,12 @@ public sealed class BitNetFixtureGenerator : IIncrementalGenerator
             if (!IsPartial)
             {
                 spc.ReportDiagnostic(Diagnostic.Create(s_mustBePartial, Location.ToLocation(), ClassName));
+                return;
+            }
+
+            if (HasUserConstructor)
+            {
+                spc.ReportDiagnostic(Diagnostic.Create(s_mustNotDeclareConstructor, Location.ToLocation(), ClassName));
                 return;
             }
 

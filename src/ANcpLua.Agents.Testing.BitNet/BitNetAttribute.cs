@@ -8,7 +8,8 @@ namespace ANcpLua.Agents.Testing.BitNet;
 /// </summary>
 /// <remarks>
 ///     <para>The target must be a non-generic, top-level <c>partial class</c> with no hand-written
-///     constructor (the generator owns it). Example:</para>
+///     constructor (the generator owns it; <c>BITNET001</c>–<c>BITNET004</c> diagnose violations).
+///     Example:</para>
 ///     <code>
 ///     [BitNet]
 ///     public partial class ChatTests
@@ -31,9 +32,11 @@ namespace ANcpLua.Agents.Testing.BitNet;
 public sealed class BitNetAttribute : Attribute
 {
     /// <summary>
-    ///     Name of the xUnit collection the generated wiring joins. Defaults to <c>"BitNet"</c>
-    ///     (defined by <see cref="BitNetTestGroup" />). Override only when you have declared your own
-    ///     <c>[CollectionDefinition(name)] : ICollectionFixture&lt;BitNetFixture&gt;</c>.
+    ///     Name of the xUnit collection the generated wiring joins. Defaults to <c>"BitNet"</c>. The
+    ///     generator also emits the matching
+    ///     <c>[CollectionDefinition(name)] : ICollectionFixture&lt;BitNetFixture&gt;</c> for whatever
+    ///     name you set, so you never hand-write one. Use a custom name to give a subset of classes
+    ///     their own shared <see cref="BitNetFixture" /> instance instead of the default single one.
     /// </summary>
     public string Collection { get; set; } = "BitNet";
 }
