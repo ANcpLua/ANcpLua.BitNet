@@ -15,18 +15,21 @@ test-double / SUT, **never** forced as a judge.
 - README + `docs/bitnet-not-a-judge.md` (the honest capability/runtime verdict, with measured evidence).
 
 ## Next (each its own small increment)
-1. **Fixture factory-dedup** — now Testing and Hosting share a repo/channel, delegate the
-   `IChatClient` build to `BitNetChatClientFactory.Create(...)` and delete the duplicated
-   private `LegacyMaxTokensPolicy` in `BitNetFixture`. (The reason it was duplicated —
-   stable-vs-alpha channel split — is gone.)
-2. **`[BitNet]` maximal generator** — a generator (shipped in the Testing package) that turns
-   `[BitNet(Model=..., Port=...)]` on a test class into the xUnit fixture/collection wiring +
-   health wait. `BitNetContainer.Create()` stays as the explicit escape hatch.
+1. **Fixture factory-dedup** — DONE (preview.2). Extracted `ANcpLua.Agents.BitNet.Core`
+   (`BitNetClientOptions` / `BitNetChatClientFactory` / `LegacyMaxTokensPolicy`, no ASP.NET Core);
+   `BitNetFixture` delegates to `BitNetChatClientFactory.Create`, duplicated policy deleted.
+2. **`[BitNet]` maximal generator** — DONE (preview.3). `ANcpLua.Agents.Testing.BitNet.Generators`
+   turns `[BitNet]` on a `partial` test class into `[Collection]` + the fixture-injecting ctor +
+   a `BitNet` accessor + `SkipUnlessBitNetAvailable()`, and emits the `[CollectionDefinition]` per
+   assembly. `BITNET001/002/003` diagnostics guard partial/top-level/non-generic. Bundled in the
+   Testing nupkg. **Deferred to v2:** per-class `[BitNet(Port=…, Model=…)]` config (it fights the
+   shared single-container model and needs a configurable fixture).
 3. **Idempotent entry** — refine `scripts/bitnet-docker.sh` to a true idempotent `up`
    (skip if already running + healthy, don't re-`rm`), add a `Makefile`
    (`make bitnet-up/down/status`, `make test`) and MSBuild props/targets in the Testing package.
-4. **Smoke tests** — `ANcpLua.Agents.Testing.BitNet.Tests` (xUnit v3 + MTP); Docker-gated via
-   `Assert.SkipUnless(fixture.IsAvailable, ...)`.
+4. **Smoke tests** — DONE (preview.3). `ANcpLua.Agents.Testing.BitNet.Tests` (xUnit v3 + MTP):
+   a generator-wiring test (runs in CI) + an auto-Docker round-trip smoke test (`[DockerEnabledFact]`,
+   opt-in via `BITNET_SMOKE_TEST=1`). CI runs them Docker-gated via `BITNET_FIXTURE_NO_DOCKER=1`.
 5. **CI + publish** — DONE (preview channel): `.github/workflows/nuget-publish.yml` is the
    ANcpLua fleet trusted-publishing pattern (keyless OIDC, no stored key), made **preview-aware**
    (`vX.Y.Z-preview.N` tags; floor `4.0.0-preview.1`). Push-to-main is the release; the 3-OS build

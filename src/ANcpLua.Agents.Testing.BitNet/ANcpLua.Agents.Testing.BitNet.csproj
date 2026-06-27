@@ -17,8 +17,32 @@
         <ProjectReference Include="..\ANcpLua.Agents.BitNet.Core\ANcpLua.Agents.BitNet.Core.csproj"/>
     </ItemGroup>
 
+    <ItemGroup Label="Bundled [BitNet] fixture generator (ships under analyzers/dotnet/cs/ in the nupkg)">
+        <ProjectReference Include="..\ANcpLua.Agents.Testing.BitNet.Generators\ANcpLua.Agents.Testing.BitNet.Generators.csproj"
+                          OutputItemType="Analyzer"
+                          ReferenceOutputAssembly="false"
+                          PrivateAssets="all"/>
+    </ItemGroup>
+
     <ItemGroup>
         <None Include="README.md" Pack="true" PackagePath="\"/>
         <None Include="..\..\LICENSE" Pack="true" PackagePath="\"/>
     </ItemGroup>
+
+    <!-- Pack the bundled generator DLL into analyzers/dotnet/cs/. Resolve via the generator
+         project's GetTargetPath target so we are immune to the artifacts/ output layout. -->
+    <PropertyGroup>
+        <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);_AddBundledGeneratorToPackage</TargetsForTfmSpecificContentInPackage>
+    </PropertyGroup>
+
+    <Target Name="_AddBundledGeneratorToPackage">
+        <MSBuild Projects="..\ANcpLua.Agents.Testing.BitNet.Generators\ANcpLua.Agents.Testing.BitNet.Generators.csproj"
+                 Targets="GetTargetPath"
+                 Properties="TargetFramework=netstandard2.0;Configuration=$(Configuration)">
+            <Output ItemName="_BundledGeneratorAssembly" TaskParameter="TargetOutputs"/>
+        </MSBuild>
+        <ItemGroup>
+            <TfmSpecificPackageFile Include="@(_BundledGeneratorAssembly)" PackagePath="analyzers/dotnet/cs/"/>
+        </ItemGroup>
+    </Target>
 </Project>

@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 using ANcpLua.Agents.Testing.BitNet;
 using Microsoft.Extensions.AI;
 
-namespace ANcpLua.Agents.Tests.Testing;
+namespace ANcpLua.Agents.Testing.BitNet.Tests;
 
 /// <summary>
 ///     End-to-end smoke test of the auto-managed Docker path. Locally gated by the

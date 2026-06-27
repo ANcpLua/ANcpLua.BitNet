@@ -3,4 +3,6 @@
   <Project Path="src/ANcpLua.Agents.Hosting.BitNet/ANcpLua.Agents.Hosting.BitNet.csproj" />
   <Project Path="src/ANcpLua.Agents.Hosting.BitNet.Generators/ANcpLua.Agents.Hosting.BitNet.Generators.csproj" />
   <Project Path="src/ANcpLua.Agents.Testing.BitNet/ANcpLua.Agents.Testing.BitNet.csproj" />
+  <Project Path="src/ANcpLua.Agents.Testing.BitNet.Generators/ANcpLua.Agents.Testing.BitNet.Generators.csproj" />
+  <Project Path="tests/ANcpLua.Agents.Testing.BitNet.Tests/ANcpLua.Agents.Testing.BitNet.Tests.csproj" />
 </Solution>
