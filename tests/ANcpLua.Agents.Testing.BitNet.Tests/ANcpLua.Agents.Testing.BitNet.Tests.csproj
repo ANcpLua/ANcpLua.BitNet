@@ -1,0 +1,26 @@
+<Project Sdk="ANcpLua.NET.Sdk.Test">
+    <PropertyGroup>
+        <RootNamespace>ANcpLua.Agents.Testing.BitNet.Tests</RootNamespace>
+        <OutputType>Exe</OutputType>
+        <GenerateDocumentationFile>false</GenerateDocumentationFile>
+        <!--
+            CS1591   — XML docs not required on test members.
+            CA1707   — underscores in test names (Method_Condition_Expected).
+            xUnit1051 — TestContext.Current.CancellationToken: stylistic, not bug-catching.
+            MEAI001  — Microsoft.Extensions.AI experimental surface used in the round-trip test.
+        -->
+        <NoWarn>$(NoWarn);CS1591;CA1707;xUnit1051;MEAI001</NoWarn>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\ANcpLua.Agents.Testing.BitNet\ANcpLua.Agents.Testing.BitNet.csproj"/>
+    </ItemGroup>
+
+    <!-- Apply the [BitNet] generator to this project too (the bundled one inside the Testing package
+         is PrivateAssets=all, so it doesn't flow transitively across a ProjectReference). -->
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\ANcpLua.Agents.Testing.BitNet.Generators\ANcpLua.Agents.Testing.BitNet.Generators.csproj"
+                          OutputItemType="Analyzer"
+                          ReferenceOutputAssembly="false"/>
+    </ItemGroup>
+</Project>
