@@ -27,8 +27,9 @@ public partial class BitNetGeneratedFixtureTests
     {
         SkipUnlessBitNetAvailable();
 
-        Assert.NotNull(BitNet.ChatClient);
-        var reply = await BitNet.ChatClient!.GetResponseAsync("Reply with exactly: pong");
+        var client = BitNet.ChatClient;
+        Assert.NotNull(client); // [NotNull] postcondition narrows 'client' — no null-forgiving '!' needed
+        var reply = await client.GetResponseAsync("Reply with exactly: pong");
         Assert.False(string.IsNullOrWhiteSpace(reply.Text));
     }
 }
