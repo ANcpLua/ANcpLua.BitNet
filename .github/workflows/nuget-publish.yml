@@ -151,6 +151,24 @@ jobs:
           check 'artifacts/ANcpLua.Agents.Hosting.BitNet.*.nupkg' ANcpLua.Agents.Hosting.BitNet.Generators.dll
           check 'artifacts/ANcpLua.Agents.Testing.BitNet.*.nupkg' ANcpLua.Agents.Testing.BitNet.Generators.dll
           echo "OK: both generators ship under analyzers/dotnet/cs/"
+          # The Testing package must also ship its auto-imported MSBuild entry points under build/.
+          TESTING=$(ls artifacts/ANcpLua.Agents.Testing.BitNet.*.nupkg)
+          for f in build/ANcpLua.Agents.Testing.BitNet.props build/ANcpLua.Agents.Testing.BitNet.targets; do
+            unzip -l "$TESTING" | grep -q "$f" \
+              || { echo "::error::$f missing from $TESTING"; exit 1; }
+          done
+          echo "OK: Testing package ships build/ props + targets"
+      - name: BitNet image digest is in sync across fixture, script, and props
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          DIGESTS=$(grep -rohE 'sha256:[a-f0-9]{64}' \
+            src/ANcpLua.Agents.Testing.BitNet/BitNetFixture.cs \
+            scripts/bitnet-docker.sh \
+            src/ANcpLua.Agents.Testing.BitNet/build/ANcpLua.Agents.Testing.BitNet.props | sort -u)
+          echo "$DIGESTS"
+          [ "$(echo "$DIGESTS" | wc -l)" -eq 1 ] \
+            || { echo "::error::BitNet image digest is out of sync across fixture / script / props"; exit 1; }
+          echo "OK: one digest everywhere"
       - name: Upload artifacts
         if: matrix.os == 'ubuntu-latest'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7

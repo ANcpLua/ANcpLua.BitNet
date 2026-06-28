@@ -24,9 +24,11 @@ test-double / SUT, **never** forced as a judge.
    assembly. `BITNET001/002/003` diagnostics guard partial/top-level/non-generic. Bundled in the
    Testing nupkg. **Deferred to v2:** per-class `[BitNet(Port=…, Model=…)]` config (it fights the
    shared single-container model and needs a configurable fixture).
-3. **Idempotent entry** — refine `scripts/bitnet-docker.sh` to a true idempotent `up`
-   (skip if already running + healthy, don't re-`rm`), add a `Makefile`
-   (`make bitnet-up/down/status`, `make test`) and MSBuild props/targets in the Testing package.
+3. **Idempotent entry** — DONE (preview.4). `scripts/bitnet-docker.sh up` is now truly idempotent
+   (no-op when already running + healthy; inspect-before-pull). `Makefile` (`bitnet-up/down/status`,
+   `build`/`test`/`test-live`/`pack`). The Testing package ships auto-imported `build/*.props` +
+   `*.targets` (`BitNetUp`/`BitNetDown`/`BitNetStatus` + `BitNetDocker*` properties). CI asserts the
+   pinned digest stays identical across fixture / script / props.
 4. **Smoke tests** — DONE (preview.3). `ANcpLua.Agents.Testing.BitNet.Tests` (xUnit v3 + MTP):
    a generator-wiring test (runs in CI) + an auto-Docker round-trip smoke test (`[DockerEnabledFact]`,
    opt-in via `BITNET_SMOKE_TEST=1`). CI runs them Docker-gated via `BITNET_FIXTURE_NO_DOCKER=1`.

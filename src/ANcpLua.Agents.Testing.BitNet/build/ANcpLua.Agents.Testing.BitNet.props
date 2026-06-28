@@ -1,0 +1,16 @@
+<Project>
+  <!--
+    Auto-imported into any project that references the ANcpLua.Agents.Testing.BitNet NuGet
+    package. Surfaces the canonical BitNet container coordinates as MSBuild properties so
+    consumers (and the BitNetUp/Down/Status targets in the sibling .targets) share one source.
+
+    These mirror BitNetFixture.DockerImage / DockerPort and scripts/bitnet-docker.sh; CI asserts
+    the digest stays in sync across all three. Override any of them in your project to point at a
+    different build, port, or container name.
+  -->
+  <PropertyGroup>
+    <BitNetDockerImage Condition="'$(BitNetDockerImage)' == ''">mcr.microsoft.com/appsvc/docs/sidecars/sample-experiment@sha256:9d5f7f4e6e5a456b40582f7b00a70a5e2a4637c37f0976bfcffd1ed252cd243a</BitNetDockerImage>
+    <BitNetDockerPort Condition="'$(BitNetDockerPort)' == ''">11434</BitNetDockerPort>
+    <BitNetDockerContainer Condition="'$(BitNetDockerContainer)' == ''">bitnet</BitNetDockerContainer>
+  </PropertyGroup>
+</Project>
