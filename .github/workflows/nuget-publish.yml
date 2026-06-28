@@ -151,6 +151,38 @@ jobs:
           check 'artifacts/ANcpLua.Agents.Hosting.BitNet.*.nupkg' ANcpLua.Agents.Hosting.BitNet.Generators.dll
           check 'artifacts/ANcpLua.Agents.Testing.BitNet.*.nupkg' ANcpLua.Agents.Testing.BitNet.Generators.dll
           echo "OK: both generators ship under analyzers/dotnet/cs/"
+          # The Testing package must also ship its auto-imported MSBuild entry points under build/.
+          TESTING=$(ls artifacts/ANcpLua.Agents.Testing.BitNet.*.nupkg)
+          for f in build/ANcpLua.Agents.Testing.BitNet.props build/ANcpLua.Agents.Testing.BitNet.targets; do
+            unzip -l "$TESTING" | grep -q "$f" \
+              || { echo "::error::$f missing from $TESTING"; exit 1; }
+          done
+          echo "OK: Testing package ships build/ props + targets"
+      - name: BitNet image digest is in sync across fixture, script, and props
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          # Each file must carry exactly one BitNet digest, and all three must be identical.
+          # Checking per-file (not just `sort -u | wc -l == 1`) catches a file that loses its
+          # digest entirely — the remaining two would still collapse to one line.
+          expected=""
+          fail=0
+          for f in \
+            src/ANcpLua.Agents.Testing.BitNet/BitNetFixture.cs \
+            scripts/bitnet-docker.sh \
+            src/ANcpLua.Agents.Testing.BitNet/build/ANcpLua.Agents.Testing.BitNet.props; do
+            d=$(grep -oE 'sha256:[a-f0-9]{64}' "$f" | sort -u)
+            n=$(printf '%s' "$d" | grep -c . || true)
+            if [ "$n" -ne 1 ]; then
+              echo "::error::$f contains $n distinct BitNet digests (expected exactly 1)"; fail=1; continue
+            fi
+            if [ -z "$expected" ]; then
+              expected="$d"
+            elif [ "$d" != "$expected" ]; then
+              echo "::error::$f digest ($d) != expected ($expected)"; fail=1
+            fi
+          done
+          [ "$fail" -eq 0 ] && echo "OK: one digest everywhere -> $expected"
+          exit "$fail"
       - name: Upload artifacts
         if: matrix.os == 'ubuntu-latest'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7

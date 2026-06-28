@@ -29,6 +29,14 @@
         <None Include="..\..\LICENSE" Pack="true" PackagePath="\"/>
     </ItemGroup>
 
+    <!-- Ship the BitNetUp/Down/Status MSBuild entry points + BitNetDocker* properties so they
+         auto-import into consuming projects. `Update` (not `Include`) because the SDK already
+         default-globs build/** as None — Include would duplicate the item. -->
+    <ItemGroup Label="MSBuild props/targets auto-imported by package consumers">
+        <None Update="build/ANcpLua.Agents.Testing.BitNet.props" Pack="true" PackagePath="build/ANcpLua.Agents.Testing.BitNet.props"/>
+        <None Update="build/ANcpLua.Agents.Testing.BitNet.targets" Pack="true" PackagePath="build/ANcpLua.Agents.Testing.BitNet.targets"/>
+    </ItemGroup>
+
     <!-- Pack the bundled generator DLL into analyzers/dotnet/cs/. Resolve via the generator
          project's GetTargetPath target so we are immune to the artifacts/ output layout. -->
     <PropertyGroup>

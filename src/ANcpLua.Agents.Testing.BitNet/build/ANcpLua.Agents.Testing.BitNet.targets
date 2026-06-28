@@ -1,0 +1,43 @@
+<Project>
+  <!--
+    Idempotent BitNet container entry points for package consumers, cross-platform via the
+    docker CLI. Invoke explicitly — these never hook into a normal build:
+
+        dotnet build -t:BitNetUp      # start (no-op if already running)
+        dotnet build -t:BitNetStatus
+        dotnet build -t:BitNetDown
+
+    They mirror scripts/bitnet-docker.sh for repos that prefer `dotnet build` over a shell
+    script. The fixture itself still auto-manages Docker; these are for the manual workflow.
+  -->
+
+  <Target Name="BitNetUp">
+    <Exec Command="docker inspect -f &quot;{{.State.Running}}&quot; $(BitNetDockerContainer)"
+          ContinueOnError="true" ConsoleToMSBuild="true" StandardOutputImportance="low">
+      <Output TaskParameter="ConsoleOutput" ItemName="_BitNetInspectLines"/>
+      <Output TaskParameter="ExitCode" PropertyName="_BitNetInspectExit"/>
+    </Exec>
+    <PropertyGroup>
+      <_BitNetRunning>@(_BitNetInspectLines)</_BitNetRunning>
+    </PropertyGroup>
+
+    <Message Condition="'$(_BitNetInspectExit)' == '0' And '$(_BitNetRunning)' == 'true'"
+             Importance="high"
+             Text="BitNet '$(BitNetDockerContainer)' is already running on :$(BitNetDockerPort) — nothing to do." />
+
+    <Exec Condition="!('$(_BitNetInspectExit)' == '0' And '$(_BitNetRunning)' == 'true')"
+          Command="docker run -d --rm --name $(BitNetDockerContainer) -p $(BitNetDockerPort):11434 $(BitNetDockerImage)" />
+    <Message Condition="!('$(_BitNetInspectExit)' == '0' And '$(_BitNetRunning)' == 'true')"
+             Importance="high"
+             Text="BitNet started on :$(BitNetDockerPort). The fixture auto-detects http://localhost:$(BitNetDockerPort) (or set BITNET_URL)." />
+  </Target>
+
+  <Target Name="BitNetDown">
+    <Exec Command="docker rm -f $(BitNetDockerContainer)" ContinueOnError="true" />
+    <Message Importance="high" Text="BitNet '$(BitNetDockerContainer)' removed (if it was running)." />
+  </Target>
+
+  <Target Name="BitNetStatus">
+    <Exec Command="docker ps --filter name=$(BitNetDockerContainer) --format &quot;{{.Names}} {{.Status}} {{.Ports}}&quot;" />
+  </Target>
+</Project>
