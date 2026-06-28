@@ -35,6 +35,8 @@ public sealed class BitNetChatClientTests
         Assert.Contains("\"max_tokens\":16", handler.Body);
         Assert.Contains("\"role\":\"user\"", handler.Body);
         Assert.Contains("\"content\":\"ping\"", handler.Body);
+        // The whole point of dropping the SDK shim: emit max_tokens, never the legacy field.
+        Assert.DoesNotContain("max_completion_tokens", handler.Body);
 
         // Response: parsed into the neutral ChatResponse shape.
         Assert.Equal("pong", response.Text);
@@ -73,6 +75,34 @@ public sealed class BitNetChatClientTests
         Assert.NotNull(metadata);
         Assert.Equal("bitnet", metadata.ProviderName);
         Assert.Equal("bitnet-test", metadata.DefaultModelId);
+    }
+
+    [Fact]
+    public async Task GetResponseAsync_throws_for_unsupported_structured_output()
+    {
+        using var handler = new CapturingHandler("{}");
+        using var http = new HttpClient(handler, disposeHandler: false);
+        using var client = new BitNetChatClient(new Uri("http://localhost:11434"), "/v1", "bitnet-test", httpClient: http);
+
+        var options = new ChatOptions { ResponseFormat = ChatResponseFormat.Json };
+
+        await Assert.ThrowsAsync<NotSupportedException>(
+            () => client.GetResponseAsync([new ChatMessage(ChatRole.User, "ping")], options));
+        Assert.Null(handler.Body); // it must fail before touching the wire
+    }
+
+    [Fact]
+    public async Task GetResponseAsync_throws_for_unsupported_tool_calling()
+    {
+        using var handler = new CapturingHandler("{}");
+        using var http = new HttpClient(handler, disposeHandler: false);
+        using var client = new BitNetChatClient(new Uri("http://localhost:11434"), "/v1", "bitnet-test", httpClient: http);
+
+        var options = new ChatOptions { Tools = [AIFunctionFactory.Create(() => "noop", "noop")] };
+
+        await Assert.ThrowsAsync<NotSupportedException>(
+            () => client.GetResponseAsync([new ChatMessage(ChatRole.User, "ping")], options));
+        Assert.Null(handler.Body);
     }
 
     private sealed class CapturingHandler(string responseJson) : HttpMessageHandler

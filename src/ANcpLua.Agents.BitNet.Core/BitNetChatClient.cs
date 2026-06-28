@@ -16,9 +16,11 @@ namespace ANcpLua.Agents.Hosting.BitNet;
 ///     <c>max_tokens</c> natively, which is why no <c>max_completion_tokens</c> shim is needed.
 /// </summary>
 /// <remarks>
-///     Streaming is response-buffered: <see cref="GetStreamingResponseAsync" /> awaits the full
-///     completion and then yields it as update(s). BitNet is a small local model used as a
-///     test-double, so token-by-token streaming is not a goal here.
+///     Scope: plain text chat-completions. Streaming is response-buffered
+///     (<see cref="GetStreamingResponseAsync" /> awaits the full completion, then yields it) — BitNet
+///     is a small local test-double, so token-by-token streaming is not a goal. Tool/function calling
+///     and structured output (<c>response_format</c>) are <b>not</b> supported: they throw
+///     <see cref="NotSupportedException" /> rather than being silently dropped.
 /// </remarks>
 public sealed class BitNetChatClient : IChatClient
 {
@@ -68,6 +70,7 @@ public sealed class BitNetChatClient : IChatClient
         CancellationToken cancellationToken = default)
     {
         Guard.NotNull(messages);
+        EnsureSupported(options);
 
         var request = BuildRequest(messages, options);
         using var content = new StringContent(JsonSerializer.Serialize(request, s_json), Encoding.UTF8, "application/json");
@@ -114,6 +117,21 @@ public sealed class BitNetChatClient : IChatClient
     public void Dispose()
     {
         if (_ownsHttp) _http.Dispose();
+    }
+
+    // Fail loud instead of silently dropping capabilities this transport doesn't carry: BitNet is a
+    // plain chat-completions model, so tool calling and structured output are out of scope.
+    private static void EnsureSupported(ChatOptions? options)
+    {
+        if (options?.Tools is { Count: > 0 })
+            throw new NotSupportedException(
+                "BitNetChatClient does not support tool/function calling. BitNet is a plain " +
+                "chat-completions test model — use a capable hosted model for tools.");
+
+        if (options?.ResponseFormat is ChatResponseFormatJson)
+            throw new NotSupportedException(
+                "BitNetChatClient does not support structured output (response_format). " +
+                "Use a capable hosted model for JSON-schema responses.");
     }
 
     private ChatRequest BuildRequest(IEnumerable<ChatMessage> messages, ChatOptions? options)
