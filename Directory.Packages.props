@@ -19,10 +19,9 @@
     <PackageVersion Include="Microsoft.Agents.AI" Version="$(MicrosoftAgentsAIVersion)"/>
   </ItemGroup>
 
-  <ItemGroup Label="Microsoft.Extensions / OpenAI">
+  <ItemGroup Label="Microsoft.Extensions">
     <PackageVersion Include="Microsoft.Extensions.AI" Version="$(MicrosoftExtensionsAIVersion)"/>
-    <PackageVersion Include="Microsoft.Extensions.AI.OpenAI" Version="$(MicrosoftExtensionsAIOpenAIVersion)"/>
-    <PackageVersion Include="OpenAI" Version="$(OpenAIVersion)"/>
+    <PackageVersion Include="System.ClientModel" Version="$(SystemClientModelVersion)"/>
   </ItemGroup>
 
   <ItemGroup Label="Testing">

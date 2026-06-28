@@ -6,18 +6,20 @@
              BitNet client core WITHOUT the hosting / ASP.NET Core stack. -->
         <RootNamespace>ANcpLua.Agents.Hosting.BitNet</RootNamespace>
         <PackageId>ANcpLua.Agents.BitNet.Core</PackageId>
-        <Description>BitNet (bitnet.cpp llama-server) client core: BitNetClientOptions, BitNetChatClientFactory (builds an OpenAI-compatible IChatClient), and the LegacyMaxTokensPolicy shim. No hosting / ASP.NET Core dependency — the shared base for ANcpLua.Agents.Hosting.BitNet and ANcpLua.Agents.Testing.BitNet. BitNet is a local test-double / system-under-test, not an authoritative judge.</Description>
+        <Description>BitNet (bitnet.cpp llama-server) client core: BitNetClientOptions plus BitNetChatClient/BitNetChatClientFactory — a dependency-free IChatClient that talks to the OpenAI-compatible /chat/completions endpoint directly over HttpClient + System.Text.Json (no provider SDK). No hosting / ASP.NET Core dependency — the shared base for ANcpLua.Agents.Hosting.BitNet and ANcpLua.Agents.Testing.BitNet. BitNet is a local test-double / system-under-test, not an authoritative judge.</Description>
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <PackageTags>bitnet;llama-cpp;local-llm;ichatclient;openai-compatible</PackageTags>
-        <!-- Mirrors upstream Microsoft.Extensions.AI / OpenAI experimental API diagnostics. -->
-        <NoWarn>$(NoWarn);OPENAI001;MEAI001</NoWarn>
+        <!-- Mirrors upstream Microsoft.Extensions.AI experimental API diagnostics. -->
+        <NoWarn>$(NoWarn);MEAI001</NoWarn>
     </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="ANcpLua.Roslyn.Utilities"/>
         <PackageReference Include="Microsoft.Extensions.AI"/>
-        <PackageReference Include="Microsoft.Extensions.AI.OpenAI"/>
-        <PackageReference Include="OpenAI"/>
+        <!-- System.ClientModel is referenced only by the [Obsolete] LegacyMaxTokensPolicy, kept for
+             compatibility. The agnostic BitNetChatClient talks to the OpenAI-compatible endpoint with
+             HttpClient + System.Text.Json — no provider SDK. -->
+        <PackageReference Include="System.ClientModel"/>
     </ItemGroup>
 
     <ItemGroup>
