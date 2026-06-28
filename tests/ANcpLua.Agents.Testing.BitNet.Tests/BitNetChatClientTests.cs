@@ -77,32 +77,24 @@ public sealed class BitNetChatClientTests
         Assert.Equal("bitnet-test", metadata.DefaultModelId);
     }
 
-    [Fact]
-    public async Task GetResponseAsync_throws_for_unsupported_structured_output()
+    [Theory]
+    [InlineData("tool_calling")]
+    [InlineData("structured_output")]
+    public async Task GetResponseAsync_throws_for_unsupported_option(string capability)
     {
         using var handler = new CapturingHandler("{}");
         using var http = new HttpClient(handler, disposeHandler: false);
         using var client = new BitNetChatClient(new Uri("http://localhost:11434"), "/v1", "bitnet-test", httpClient: http);
 
-        var options = new ChatOptions { ResponseFormat = ChatResponseFormat.Json };
+        var options = capability switch
+        {
+            "tool_calling" => new ChatOptions { Tools = [AIFunctionFactory.Create(() => "noop", "noop")] },
+            _ => new ChatOptions { ResponseFormat = ChatResponseFormat.Json }
+        };
 
         await Assert.ThrowsAsync<NotSupportedException>(
             () => client.GetResponseAsync([new ChatMessage(ChatRole.User, "ping")], options));
         Assert.Null(handler.Body); // it must fail before touching the wire
-    }
-
-    [Fact]
-    public async Task GetResponseAsync_throws_for_unsupported_tool_calling()
-    {
-        using var handler = new CapturingHandler("{}");
-        using var http = new HttpClient(handler, disposeHandler: false);
-        using var client = new BitNetChatClient(new Uri("http://localhost:11434"), "/v1", "bitnet-test", httpClient: http);
-
-        var options = new ChatOptions { Tools = [AIFunctionFactory.Create(() => "noop", "noop")] };
-
-        await Assert.ThrowsAsync<NotSupportedException>(
-            () => client.GetResponseAsync([new ChatMessage(ChatRole.User, "ping")], options));
-        Assert.Null(handler.Body);
     }
 
     private sealed class CapturingHandler(string responseJson) : HttpMessageHandler
