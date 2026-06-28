@@ -89,7 +89,8 @@ public sealed class BitNetChatClientTests
         var options = capability switch
         {
             "tool_calling" => new ChatOptions { Tools = [AIFunctionFactory.Create(() => "noop", "noop")] },
-            _ => new ChatOptions { ResponseFormat = ChatResponseFormat.Json }
+            "structured_output" => new ChatOptions { ResponseFormat = ChatResponseFormat.Json },
+            _ => throw new ArgumentOutOfRangeException(nameof(capability), capability, "unhandled capability")
         };
 
         await Assert.ThrowsAsync<NotSupportedException>(
