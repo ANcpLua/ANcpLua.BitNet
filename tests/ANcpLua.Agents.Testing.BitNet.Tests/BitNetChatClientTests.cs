@@ -71,7 +71,7 @@ public sealed class BitNetChatClientTests
         var metadata = client.GetService(typeof(ChatClientMetadata)) as ChatClientMetadata;
 
         Assert.NotNull(metadata);
-        Assert.Equal("bitnet", metadata!.ProviderName);
+        Assert.Equal("bitnet", metadata.ProviderName);
         Assert.Equal("bitnet-test", metadata.DefaultModelId);
     }
 
