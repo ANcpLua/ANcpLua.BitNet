@@ -20,7 +20,11 @@ namespace ANcpLua.Agents.Hosting.BitNet;
 ///     <c>WriteToAsync</c> end-to-end so the pipeline never blocks on sync I/O.
 ///     Self-deleting: once the target server accepts <c>max_completion_tokens</c>
 ///     natively, this becomes a no-op.
+///     <para><b>Obsolete.</b> The agnostic <see cref="BitNetChatClient" /> builds the request body
+///     itself and emits <c>max_tokens</c> natively, so this OpenAI-SDK pipeline shim is no longer
+///     used by <see cref="BitNetChatClientFactory" />. Retained for compatibility only.</para>
 /// </remarks>
+[Obsolete("No longer used: BitNetChatClient emits max_tokens natively. Retained for source/binary compatibility; will be removed in a future major version.")]
 public sealed class LegacyMaxTokensPolicy : PipelinePolicy
 {
     /// <inheritdoc />

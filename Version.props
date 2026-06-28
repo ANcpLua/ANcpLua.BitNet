@@ -14,15 +14,11 @@
 
   <PropertyGroup Label="Microsoft.Extensions">
     <MicrosoftExtensionsAIVersion>10.7.0</MicrosoftExtensionsAIVersion>
-    <MicrosoftExtensionsAIOpenAIVersion>10.7.0</MicrosoftExtensionsAIOpenAIVersion>
+    <SystemClientModelVersion>1.10.0</SystemClientModelVersion>
   </PropertyGroup>
 
   <PropertyGroup Label="Roslyn">
     <MicrosoftCodeAnalysisCSharpVersion>5.3.0</MicrosoftCodeAnalysisCSharpVersion>
-  </PropertyGroup>
-
-  <PropertyGroup Label="LLM Provider SDKs">
-    <OpenAIVersion>2.11.0</OpenAIVersion>
   </PropertyGroup>
 
   <PropertyGroup Label="Testing">

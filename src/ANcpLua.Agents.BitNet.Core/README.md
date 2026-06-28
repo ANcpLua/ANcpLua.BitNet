@@ -3,13 +3,16 @@
 The **client core** for the BitNet (`bitnet.cpp` / `llama-server`) stack — the
 shared base that both [`ANcpLua.Agents.Hosting.BitNet`](https://www.nuget.org/packages/ANcpLua.Agents.Hosting.BitNet)
 and [`ANcpLua.Agents.Testing.BitNet`](https://www.nuget.org/packages/ANcpLua.Agents.Testing.BitNet)
-build on, with **no hosting / ASP.NET Core dependency**.
+build on, with **no hosting stack and no provider SDK** — it speaks the OpenAI-compatible wire
+protocol directly over `HttpClient` + `System.Text.Json`, exposing only the vendor-neutral
+`IChatClient`.
 
 | Type | What it does |
 |---|---|
 | `BitNetClientOptions` | Endpoint / API-path / model config, with `BITNET_URL` · `BITNET_API_PATH` · `BITNET_MODEL` environment overrides. |
-| `BitNetChatClientFactory` | `Create(options)` → an OpenAI-compatible `IChatClient` bound to the `llama-server` endpoint. |
-| `LegacyMaxTokensPolicy` | Mirrors `max_completion_tokens` → `max_tokens` for `llama-server` builds before ggml-org/llama.cpp PR #19831. Self-deleting once the server honors the new field. |
+| `BitNetChatClient` | A dependency-free `IChatClient` that POSTs straight to the OpenAI-compatible `/chat/completions` endpoint. No provider SDK; emits `max_tokens` natively. |
+| `BitNetChatClientFactory` | `Create(options)` → a configured `BitNetChatClient` as `IChatClient`. |
+| `LegacyMaxTokensPolicy` | **Obsolete.** Was an OpenAI-SDK pipeline shim mirroring `max_completion_tokens` → `max_tokens`; the agnostic client emits `max_tokens` natively, so it is unused. Kept for compatibility. |
 
 ```csharp
 using ANcpLua.Agents.Hosting.BitNet;
