@@ -37,7 +37,19 @@ test-double / SUT, **never** forced as a judge.
    (`vX.Y.Z-preview.N` tags; floor `4.0.0-preview.1`). Push-to-main is the release; the 3-OS build
    matrix gates it; a one-time nuget.org Trusted Publishing policy authorizes the OIDC push. Stable
    `4.0.0` is a deliberate `workflow_dispatch version=4.0.0` once the items above land.
-6. **Re-home `ANcpLua.NET.Sdk.BitNet`** — the orphaned SDK meta-package, into this repo.
+6. **`ANcpLua.NET.Sdk.BitNet` — WON'T DO (deliberately dropped).** It was an MSBuild project-SDK
+   variant (Web-based) whose only value was auto-referencing `ANcpLua.Agents.Hosting.BitNet`.
+   ANcpLua/ANcpLua.Agents removed it (commit `32d2067`) because it "earned one PackageReference line
+   of savings" — a whole versioned SDK package to spare a single `<PackageReference>` is exactly the
+   machinery this repo avoids (*never force the unsuited*). The one-liner is simply
+   `<PackageReference Include="ANcpLua.Agents.Hosting.BitNet"/>` + `builder.AddBitNetChatClient()`;
+   tests use `[BitNet]` + the auto-imported `build/` targets. (Frozen at 3.4.33 on nuget.org.)
+
+---
+
+**Roadmap status:** items 1–5 done and published (`4.0.0-preview.4`); item 6 consciously dropped
+above. The only intentionally-open future work is v2 per-class `[BitNet(Port=…, Model=…)]` config
+(noted under item 2), deferred because it fights the shared single-container model.
 
 ## Notes / facts
 - Pinned image digest: `mcr.microsoft.com/appsvc/docs/sidecars/sample-experiment@sha256:9d5f7f4e…cd243a`.
