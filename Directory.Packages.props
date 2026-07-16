@@ -15,7 +15,7 @@
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="$(MicrosoftCodeAnalysisCSharpVersion)"/>
   </ItemGroup>
 
-  <ItemGroup Label="Microsoft.Agents (MAF 1.11.x)">
+  <ItemGroup Label="Microsoft.Agents (MAF 1.13.x)">
     <PackageVersion Include="Microsoft.Agents.AI" Version="$(MicrosoftAgentsAIVersion)"/>
   </ItemGroup>
 

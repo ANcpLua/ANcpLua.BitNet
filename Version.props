@@ -5,11 +5,11 @@
     so every referenced version variable must be defined here.
   -->
   <PropertyGroup Label="Roslyn.Utilities (sibling repo)">
-    <ANcpLuaRoslynUtilitiesVersion>2.2.27</ANcpLuaRoslynUtilitiesVersion>
+    <ANcpLuaRoslynUtilitiesVersion>2.2.38</ANcpLuaRoslynUtilitiesVersion>
   </PropertyGroup>
 
-  <PropertyGroup Label="Microsoft.Agents (MAF 1.11.0)">
-    <MicrosoftAgentsAIVersion>1.11.0</MicrosoftAgentsAIVersion>
+  <PropertyGroup Label="Microsoft.Agents (MAF 1.13.0)">
+    <MicrosoftAgentsAIVersion>1.13.0</MicrosoftAgentsAIVersion>
   </PropertyGroup>
 
   <PropertyGroup Label="Microsoft.Extensions">
@@ -18,7 +18,8 @@
   </PropertyGroup>
 
   <PropertyGroup Label="Roslyn">
-    <MicrosoftCodeAnalysisCSharpVersion>5.3.0</MicrosoftCodeAnalysisCSharpVersion>
+    <!-- ANcpLua.Roslyn.Utilities 2.2.38 floors Microsoft.CodeAnalysis.CSharp at 5.6.0. -->
+    <MicrosoftCodeAnalysisCSharpVersion>5.6.0</MicrosoftCodeAnalysisCSharpVersion>
   </PropertyGroup>
 
   <PropertyGroup Label="Testing">
