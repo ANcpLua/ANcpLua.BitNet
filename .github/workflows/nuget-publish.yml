@@ -230,7 +230,7 @@ jobs:
               echo "has_changes=true" >> "$GITHUB_OUTPUT"
               exit 0
             fi
-            CHANGES=$(git diff --name-only "$COMPARE_TAG" HEAD -- 'src/**' '.github/workflows/nuget-publish.yml' || true)
+            CHANGES=$(git diff --name-only "$COMPARE_TAG" HEAD -- 'src/**' 'Version.props' 'Directory.Packages.props' '.github/workflows/nuget-publish.yml' || true)
             if [ -n "$CHANGES" ]; then
               echo "$CHANGES"
               echo "has_changes=true" >> "$GITHUB_OUTPUT"
