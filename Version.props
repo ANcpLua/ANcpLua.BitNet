@@ -5,7 +5,7 @@
     so every referenced version variable must be defined here.
   -->
   <PropertyGroup Label="Roslyn.Utilities (sibling repo)">
-    <ANcpLuaRoslynUtilitiesVersion>2.2.39</ANcpLuaRoslynUtilitiesVersion>
+    <ANcpLuaRoslynUtilitiesVersion>2.2.41</ANcpLuaRoslynUtilitiesVersion>
   </PropertyGroup>
 
   <PropertyGroup Label="Microsoft.Agents (MAF 1.13.0)">
