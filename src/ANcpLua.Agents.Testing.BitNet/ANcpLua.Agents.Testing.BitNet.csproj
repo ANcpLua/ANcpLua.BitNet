@@ -13,8 +13,8 @@
         <PackageReference Include="xunit.v3.extensibility.core"/>
     </ItemGroup>
 
-    <ItemGroup Label="Shared client core (BitNetClientOptions / BitNetChatClientFactory) — no ASP.NET Core">
-        <ProjectReference Include="..\ANcpLua.Agents.BitNet.Core\ANcpLua.Agents.BitNet.Core.csproj"/>
+    <ItemGroup Label="Client core (BitNetClientOptions / BitNetChatClientFactory) — lives in Hosting.BitNet since the 5.0.0 merge of ANcpLua.Agents.BitNet.Core. This drags MAF + the ASP.NET Core framework reference into the fixture's closure; accepted deliberately — the fixture is consumed by test projects running on a full SDK, and the standalone Core id had zero consumers.">
+        <ProjectReference Include="..\ANcpLua.Agents.Hosting.BitNet\ANcpLua.Agents.Hosting.BitNet.csproj"/>
     </ItemGroup>
 
     <ItemGroup Label="Bundled [BitNet] fixture generator (ships under analyzers/dotnet/cs/ in the nupkg)">

@@ -20,7 +20,6 @@ test-live: bitnet-up ## Start BitNet, then run the auto-Docker round-trip smoke 
 	BITNET_SMOKE_TEST=1 dotnet test $(TESTS) -c Release
 
 pack: ## Pack the three publishable packages into ./artifacts
-	dotnet pack src/ANcpLua.Agents.BitNet.Core/ANcpLua.Agents.BitNet.Core.csproj       -c Release -o artifacts
 	dotnet pack src/ANcpLua.Agents.Hosting.BitNet/ANcpLua.Agents.Hosting.BitNet.csproj -c Release -o artifacts
 	dotnet pack src/ANcpLua.Agents.Testing.BitNet/ANcpLua.Agents.Testing.BitNet.csproj -c Release -o artifacts
 

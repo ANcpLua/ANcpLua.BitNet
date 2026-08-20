@@ -11,6 +11,11 @@ core) so the already-published packages stop being orphaned.
 | `ANcpLua.Agents.Hosting.BitNet.Generators` | The incremental generator (ships inside the hosting package's `analyzers/`). |
 | `ANcpLua.Agents.Testing.BitNet` | xUnit v3 `BitNetFixture` that auto-manages a **digest-pinned**, idempotent (inspect-before-pull) BitNet Docker container and exposes an `IChatClient`. |
 
+> `ANcpLua.Agents.BitNet.Core` was retired in **5.0.0**: its four files (client, factory, options,
+> legacy shim) moved into `ANcpLua.Agents.Hosting.BitNet`. The namespace was always
+> `ANcpLua.Agents.Hosting.BitNet`, so migrating is a package-reference swap with zero code changes.
+> The 4.0.x Core packages stay restorable on nuget.org (deprecated, pointing here).
+
 ## The honest part (why this is publishable with a clear conscience)
 
 **BitNet is a local test-double / system-under-test — not an authoritative judge.** A 1.58-bit

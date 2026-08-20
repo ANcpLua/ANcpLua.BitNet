@@ -2,7 +2,7 @@
     <PropertyGroup>
         <RootNamespace>ANcpLua.Agents.Hosting.BitNet</RootNamespace>
         <PackageId>ANcpLua.Agents.Hosting.BitNet</PackageId>
-        <Description>BitNet (bitnet.cpp llama-server) hosting facades. Reads the OpenAI-compatible /v1 surface exposed by bitnet.cpp and registers a keyed IChatClient, health-check, and legacy-max-tokens shim. Bundles a Roslyn source generator that auto-wires [assembly: BitNetEndpoint] attributes. BitNet is a local test-double / system-under-test, not an authoritative judge.</Description>
+        <Description>BitNet (bitnet.cpp llama-server) hosting facades. Reads the OpenAI-compatible /v1 surface exposed by bitnet.cpp and registers a keyed IChatClient, health-check, and legacy-max-tokens shim. Contains the BitNet client core (BitNetChatClient/BitNetChatClientFactory/BitNetClientOptions — formerly ANcpLua.Agents.BitNet.Core, merged in 5.0.0). Bundles a Roslyn source generator that auto-wires [assembly: BitNetEndpoint] attributes. BitNet is a local test-double / system-under-test, not an authoritative judge.</Description>
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <PackageTags>bitnet;llama-cpp;local-llm;hosting;ichatclient;openai-compatible</PackageTags>
         <!-- Mirrors upstream Microsoft.Extensions.AI / OpenAI experimental API diagnostics. -->
@@ -14,10 +14,11 @@
         <PackageReference Include="ANcpLua.Roslyn.Utilities"/>
         <PackageReference Include="Microsoft.Agents.AI"/>
         <PackageReference Include="Microsoft.Extensions.AI"/>
-    </ItemGroup>
-
-    <ItemGroup Label="Shared client core (BitNetClientOptions / Factory / LegacyMaxTokensPolicy) — no ASP.NET Core">
-        <ProjectReference Include="..\ANcpLua.Agents.BitNet.Core\ANcpLua.Agents.BitNet.Core.csproj"/>
+        <!-- System.ClientModel is referenced only by the [Obsolete] LegacyMaxTokensPolicy, kept for
+             compatibility. The client core (BitNetChatClient/Factory/Options, absorbed from the
+             retired ANcpLua.Agents.BitNet.Core in 5.0.0) talks to the OpenAI-compatible endpoint
+             with HttpClient + System.Text.Json — no provider SDK. -->
+        <PackageReference Include="System.ClientModel"/>
     </ItemGroup>
 
     <ItemGroup Label="Bundled Roslyn source generator (ships under analyzers/dotnet/cs/ in the nupkg)">
