@@ -15,9 +15,12 @@ test-double / SUT, **never** forced as a judge.
 - README + `docs/bitnet-not-a-judge.md` (the honest capability/runtime verdict, with measured evidence).
 
 ## Next (each its own small increment)
-1. **Fixture factory-dedup** — DONE (preview.2). Extracted `ANcpLua.Agents.BitNet.Core`
-   (`BitNetClientOptions` / `BitNetChatClientFactory` / `LegacyMaxTokensPolicy`, no ASP.NET Core);
-   `BitNetFixture` delegates to `BitNetChatClientFactory.Create`, duplicated policy deleted.
+1. **Fixture factory-dedup** — DONE (preview.2), then REVERSED (5.0.0). The extracted
+   `ANcpLua.Agents.BitNet.Core` had zero consumers outside this repo, so 5.0.0 folded its four
+   files back into `ANcpLua.Agents.Hosting.BitNet` (same namespace — Core always compiled as
+   `ANcpLua.Agents.Hosting.BitNet`) and retired the package id. The fixture still delegates to
+   `BitNetChatClientFactory.Create`; its closure now includes MAF + the ASP.NET Core framework
+   reference, accepted deliberately for test-project consumers.
 2. **`[BitNet]` maximal generator** — DONE (preview.3). `ANcpLua.Agents.Testing.BitNet.Generators`
    turns `[BitNet]` on a `partial` test class into `[Collection]` + the fixture-injecting ctor +
    a `BitNet` accessor + `SkipUnlessBitNetAvailable()`, and emits the `[CollectionDefinition]` per
