@@ -77,7 +77,13 @@ jobs:
             # Floor for a fresh repo: stay in the 4.0.0 preview channel until a stable
             # v4.0.0 tag is cut deliberately (via workflow_dispatch version=4.0.0).
             BASE="4.0.0-preview.1"
-            LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+            # Highest reachable v* tag by SemVer — NOT `git describe`, which picks the
+            # graph-NEAREST tag. With two tags on one commit (a major dispatched from an
+            # unchanged HEAD leaves e.g. v1.13.10 AND v2.0.0 there), describe chose the old
+            # line and the next push auto-bumped it (this produced the stray 2.1.14/4.0.4
+            # releases on 2026-08-21). The dpkg-style '~' swap makes pre-release tags sort
+            # below their release under GNU sort -V.
+            LATEST_TAG=$(git tag --list 'v*' --merged HEAD | sed 's/-/~/' | sort -V | tail -n1 | sed 's/~/-/')
             if [[ "$LATEST_TAG" =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+)(-preview\.([0-9]+))?$ ]]; then
               MAJOR=${BASH_REMATCH[1]}
               MINOR=${BASH_REMATCH[2]}
@@ -217,13 +223,13 @@ jobs:
             echo "has_changes=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          LATEST_TAG=$(git tag --list 'v*' --merged HEAD | sed 's/-/~/' | sort -V | tail -n1 | sed 's/~/-/')
           if [ -z "$LATEST_TAG" ]; then
             echo "has_changes=true" >> "$GITHUB_OUTPUT"
           else
             COMPARE_TAG="$LATEST_TAG"
             if git tag --points-at HEAD | grep -qFx "$LATEST_TAG"; then
-              COMPARE_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+              COMPARE_TAG=$(git tag --list 'v*' --merged HEAD^ | sed 's/-/~/' | sort -V | tail -n1 | sed 's/~/-/')
             fi
             if [ -z "$COMPARE_TAG" ]; then
               echo "has_changes=true" >> "$GITHUB_OUTPUT"
