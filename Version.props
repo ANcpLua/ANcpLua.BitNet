@@ -22,8 +22,4 @@
     <MicrosoftCodeAnalysisCSharpVersion>5.9.0</MicrosoftCodeAnalysisCSharpVersion>
   </PropertyGroup>
 
-  <PropertyGroup Label="Testing">
-    <XunitV3Version>3.2.2</XunitV3Version>
-    <MTPExtensionsVersion>2.1.0</MTPExtensionsVersion>
-  </PropertyGroup>
 </Project>
