@@ -25,9 +25,6 @@
   </ItemGroup>
 
   <ItemGroup Label="Testing">
-    <PackageVersion Update="xunit.v3" Version="$(XunitV3Version)"/>
-    <PackageVersion Update="xunit.v3.mtp-v2" Version="$(XunitV3Version)"/>
-    <PackageVersion Update="Microsoft.Testing.Platform" Version="$(MTPExtensionsVersion)"/>
     <PackageVersion Include="xunit.v3.extensibility.core" Version="$(XunitV3Version)"/>
     <PackageVersion Include="xunit.v3.assert" Version="$(XunitV3Version)"/>
   </ItemGroup>

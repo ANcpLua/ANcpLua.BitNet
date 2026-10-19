@@ -1,24 +1,32 @@
 <Project>
   <!--
     LOCAL OVERRIDE — ANcpLua.BitNet
-    Directory.Packages.props imports this before the SDK-shipped truth is in scope,
-    so every referenced version variable must be defined here.
+    ANcpLua.NET.Sdk loads its own Build/Common/Version.props first; Directory.Packages.props
+    imports this file afterwards, so every property here overrides SDK truth. Properties the
+    SDK already defines (XunitV3Version, MTPExtensionsVersion, ...) need no entry here.
+    The renovate comments make each property an updatable dependency (shared preset).
   -->
   <PropertyGroup Label="Roslyn.Utilities (sibling repo)">
-    <ANcpLuaRoslynUtilitiesVersion>2.2.48</ANcpLuaRoslynUtilitiesVersion>
+    <!-- Also feeds ANcpLua.Roslyn.Utilities.Sources (released in lockstep). -->
+    <!-- renovate: datasource=nuget depName=ANcpLua.Roslyn.Utilities -->
+    <ANcpLuaRoslynUtilitiesVersion>3.0.1</ANcpLuaRoslynUtilitiesVersion>
   </PropertyGroup>
 
   <PropertyGroup Label="Microsoft.Agents (MAF 1.13.0)">
+    <!-- renovate: datasource=nuget depName=Microsoft.Agents.AI -->
     <MicrosoftAgentsAIVersion>1.13.0</MicrosoftAgentsAIVersion>
   </PropertyGroup>
 
   <PropertyGroup Label="Microsoft.Extensions">
+    <!-- renovate: datasource=nuget depName=Microsoft.Extensions.AI -->
     <MicrosoftExtensionsAIVersion>10.7.0</MicrosoftExtensionsAIVersion>
+    <!-- renovate: datasource=nuget depName=System.ClientModel -->
     <SystemClientModelVersion>1.10.0</SystemClientModelVersion>
   </PropertyGroup>
 
   <PropertyGroup Label="Roslyn">
     <!-- ANcpLua.Roslyn.Utilities 2.2.47+ floors Microsoft.CodeAnalysis.CSharp at 5.9.0, the compiler of SDK 10.0.4xx. -->
+    <!-- renovate: datasource=nuget depName=Microsoft.CodeAnalysis.CSharp -->
     <MicrosoftCodeAnalysisCSharpVersion>5.9.0</MicrosoftCodeAnalysisCSharpVersion>
   </PropertyGroup>
 

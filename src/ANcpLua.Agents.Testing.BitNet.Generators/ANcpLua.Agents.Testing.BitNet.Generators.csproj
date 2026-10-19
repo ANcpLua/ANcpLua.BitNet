@@ -1,8 +1,6 @@
 <Project Sdk="ANcpLua.NET.Sdk">
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
-        <LangVersion>latest</LangVersion>
-        <Nullable>enable</Nullable>
         <PackageId>ANcpLua.Agents.Testing.BitNet.Generators</PackageId>
         <RootNamespace>ANcpLua.Agents.Testing.BitNet.Generators</RootNamespace>
 
